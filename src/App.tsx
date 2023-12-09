@@ -14,4 +14,22 @@ export const getMoodRepresentation = (mood: Mood) => {
   return moods[mood];
 };
 
+export const makeStorage = <TData,>() => {
+  const db: TData[] = [];
+
+  return {
+    add: (data: TData) => {
+      db.push(data);
+    },
+    edit: (id: number, data: TData) => {
+      db[id] = data;
+    },
+    getFrom: (filter?: (item: TData) => boolean) => {
+      if (!filter) return db;
+
+      return db.filter(filter);
+    },
+  };
+};
+
 export const App = () => null;
