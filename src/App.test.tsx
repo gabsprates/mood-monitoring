@@ -4,12 +4,25 @@ import { App, Mood, getMoodRepresentation, makeStorage } from "./App";
 const mocked_moods = [Mood.DISTRACTED, Mood.FULL_ENERGY, Mood.SLEEPY];
 
 describe("Component: App", () => {
-  it("should render", () => {
-    render(<App moods={mocked_moods} />);
+  describe("rendering", () => {
+    it("should render title", () => {
+      render(<App moods={mocked_moods} />);
 
-    screen.debug();
+      expect(
+        screen.getByRole("heading", { name: "mood monitoring" })
+      ).toBeInTheDocument();
+    });
 
-    expect(document.querySelector("div")).toBeInTheDocument();
+    it("should render mood buttons", () => {
+      render(<App moods={mocked_moods} />);
+
+      const buttons = screen.getAllByRole("button");
+      expect(buttons).toHaveLength(3);
+
+      expect(buttons[0]).toHaveTextContent("distracted");
+      expect(buttons[1]).toHaveTextContent("full energy");
+      expect(buttons[2]).toHaveTextContent("sleepy");
+    });
   });
 });
 
