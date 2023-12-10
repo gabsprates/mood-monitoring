@@ -14,5 +14,7 @@ export default defineConfig({
     host: true,
   },
 
+  base: "/mood-monitoring/",
+
   plugins: [react()],
 });
