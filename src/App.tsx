@@ -16,7 +16,7 @@ export const getMoodRepresentation = (mood: Mood) => {
 
 export interface MoodEntry {
   mood: Mood;
-  timestamp: string;
+  timestamp: number;
 }
 
 export interface Storage<TData> {
@@ -43,11 +43,17 @@ export const makeStorage = <TData,>(): Storage<TData> => {
   };
 };
 
-interface AppProps {
-  moods: Mood[];
+export interface UseCases {
+  addMood: (data: MoodEntry) => Promise<number>;
+  loadHistory: () => Promise<MoodEntry[]>;
 }
 
-export const App = ({ moods }: AppProps) => {
+interface AppProps {
+  moods: Mood[];
+  useCases: UseCases;
+}
+
+export const App = ({ moods, useCases }: AppProps) => {
   return (
     <main className="app">
       <h1 className="title">mood monitoring</h1>
@@ -56,9 +62,14 @@ export const App = ({ moods }: AppProps) => {
         {moods.map((mood) => {
           const { label, symbol } = getMoodRepresentation(mood);
 
+          const onClick = () => {
+            useCases.addMood({ mood, timestamp: Date.now() });
+          };
+
           return (
             <li key={mood} className="mood-item">
               <button
+                onClick={onClick}
                 className={`mood-button mood-button--${mood.toLowerCase()}`}
               >
                 <span className="mood-button__symbol">{symbol}</span>
