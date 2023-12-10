@@ -1,9 +1,11 @@
 import { render, screen } from "@testing-library/react";
 import { App, Mood, getMoodRepresentation, makeStorage } from "./App";
 
+const mocked_moods = [Mood.DISTRACTED, Mood.FULL_ENERGY, Mood.SLEEPY];
+
 describe("Component: App", () => {
   it("should render", () => {
-    render(<App />);
+    render(<App moods={mocked_moods} />);
 
     screen.debug();
 
@@ -13,9 +15,11 @@ describe("Component: App", () => {
 
 describe("Helper: getMoodRepresentation", () => {
   it("should return right color for each mood", () => {
-    expect(getMoodRepresentation(Mood.DISTRACTED).color).toEqual("red");
-    expect(getMoodRepresentation(Mood.FULL_ENERGY).color).toEqual("green");
-    expect(getMoodRepresentation(Mood.SLEEPY).color).toEqual("blue");
+    expect(getMoodRepresentation(Mood.DISTRACTED).label).toEqual("distracted");
+    expect(getMoodRepresentation(Mood.FULL_ENERGY).label).toEqual(
+      "full energy"
+    );
+    expect(getMoodRepresentation(Mood.SLEEPY).label).toEqual("sleepy");
   });
 });
 

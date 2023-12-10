@@ -10,5 +10,9 @@ export default defineConfig({
     setupFiles: ["./setupTest.ts"],
   },
 
+  server: {
+    host: true,
+  },
+
   plugins: [react()],
 });
