@@ -37,18 +37,19 @@ describe("Helper: getMoodRepresentation", () => {
 });
 
 describe("Factory: makeStorage", () => {
-  it("should give a valid storage", () => {
+  it("should give a valid storage", async () => {
     const storage = makeStorage<string>();
 
-    expect(storage.getFrom()).toEqual([]);
+    expect(await storage.getFrom()).toEqual([]);
 
-    storage.add("foo");
-    storage.add("bar");
+    await storage.add("foo");
+    await storage.add("bar");
 
-    expect(storage.getFrom()).toEqual(["foo", "bar"]);
+    expect(await storage.getFrom()).toEqual(["foo", "bar"]);
 
-    storage.edit(0, "FOO");
+    await storage.edit(0, (data) => data.toUpperCase());
 
-    expect(storage.getFrom((item) => item === "FOO")).toEqual(["FOO"]);
+    const results = await storage.getFrom((item) => item === "FOO");
+    expect(results).toEqual(["FOO"]);
   });
 });

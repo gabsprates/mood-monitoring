@@ -14,17 +14,28 @@ export const getMoodRepresentation = (mood: Mood) => {
   return moods[mood];
 };
 
-export const makeStorage = <TData,>() => {
+export interface MoodEntry {
+  mood: Mood;
+  timestamp: string;
+}
+
+export interface Storage<TData> {
+  add: (data: TData) => Promise<number>;
+  edit: (id: number, action: (currentData: TData) => TData) => Promise<void>;
+  getFrom: (filter?: (item: TData) => boolean) => Promise<TData[]>;
+}
+
+export const makeStorage = <TData,>(): Storage<TData> => {
   const db: TData[] = [];
 
   return {
-    add: (data: TData) => {
-      db.push(data);
+    add: async (data) => {
+      return db.push(data) - 1;
     },
-    edit: (id: number, data: TData) => {
-      db[id] = data;
+    edit: async (id, action) => {
+      db[id] = action(db[id]);
     },
-    getFrom: (filter?: (item: TData) => boolean) => {
+    getFrom: async (filter) => {
       if (!filter) return db;
 
       return db.filter(filter);
