@@ -1,25 +1,53 @@
-import { render, screen } from "@testing-library/react";
+import {
+  render,
+  screen,
+  waitForElementToBeRemoved,
+  within,
+} from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
-import { App, Mood, getMoodRepresentation, makeStorage } from "./App";
+import {
+  App,
+  Mood,
+  MoodEntry,
+  getMoodRepresentation,
+  makeStorage,
+} from "./App";
 
 const mocked_moods = [Mood.DISTRACTED, Mood.FULL_ENERGY, Mood.SLEEPY];
-const mocked_useCases = {
-  addMood: vi.fn(),
-  loadHistory: vi.fn(),
+
+const mockUseCases = () => {
+  const storage = makeStorage<MoodEntry>();
+
+  return {
+    addMood: vi.fn((mood) => storage.add(mood)),
+    loadHistory: vi.fn(() => storage.getFrom()),
+  };
 };
 
 describe("Component: App", () => {
+  const waitLoadingToFinish = async () => {
+    await waitForElementToBeRemoved(screen.getByText(/loading/i));
+  };
+
   describe("rendering", () => {
-    it("should render title", () => {
-      render(<App moods={mocked_moods} useCases={mocked_useCases} />);
+    it("should render title", async () => {
+      render(<App moods={mocked_moods} useCases={mockUseCases()} />);
+
+      await waitLoadingToFinish();
 
       expect(
         screen.getByRole("heading", { name: "mood monitoring" })
       ).toBeInTheDocument();
+
+      expect(
+        screen.getByRole("heading", { name: "mood history" })
+      ).toBeInTheDocument();
     });
 
-    it("should render mood buttons", () => {
-      render(<App moods={mocked_moods} useCases={mocked_useCases} />);
+    it("should render mood buttons", async () => {
+      render(<App moods={mocked_moods} useCases={mockUseCases()} />);
+
+      await waitLoadingToFinish();
 
       const buttons = screen.getAllByRole("button");
       expect(buttons).toHaveLength(3);
@@ -31,14 +59,32 @@ describe("Component: App", () => {
   });
 
   describe("use cases", () => {
-    beforeEach(() => {
-      mocked_useCases.addMood.mockRestore();
+    it("should load moods on first render", async () => {
+      const mocked_useCases = mockUseCases();
+      await mocked_useCases.addMood({
+        mood: Mood.FULL_ENERGY,
+        timestamp: Date.now(),
+      });
+
+      render(<App moods={mocked_moods} useCases={mocked_useCases} />);
+
+      const moodList = await screen.findByRole("list", {
+        name: "mood history",
+      });
+
+      const items = within(moodList).getAllByRole("listitem");
+
+      expect(items).toHaveLength(1);
+      expect(items[0]).toHaveTextContent(/full_energy/i);
     });
 
     it("should add mood", async () => {
       const user = userEvent.setup();
 
+      const mocked_useCases = mockUseCases();
       render(<App moods={mocked_moods} useCases={mocked_useCases} />);
+
+      await waitLoadingToFinish();
 
       const distractedButton = screen.getByRole("button", {
         name: /distracted/i,

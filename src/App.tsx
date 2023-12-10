@@ -1,3 +1,5 @@
+import { useCallback, useEffect, useState } from "react";
+
 export enum Mood {
   DISTRACTED = "DISTRACTED",
   FULL_ENERGY = "FULL_ENERGY",
@@ -54,6 +56,20 @@ interface AppProps {
 }
 
 export const App = ({ moods, useCases }: AppProps) => {
+  const [loading, setLoading] = useState(true);
+  const [moodHistory, setMoodHistory] = useState<MoodEntry[]>([]);
+
+  const handleMoodHistory = useCallback(() => {
+    useCases.loadHistory().then((moodList) => {
+      setMoodHistory(moodList.reverse());
+      setLoading(false);
+    });
+  }, [useCases]);
+
+  useEffect(() => {
+    handleMoodHistory();
+  }, [handleMoodHistory]);
+
   return (
     <main className="app">
       <h1 className="title">mood monitoring</h1>
@@ -89,6 +105,22 @@ export const App = ({ moods, useCases }: AppProps) => {
         <button className="button">settings</button>
       </div>
       */}
+
+      {loading ? (
+        <p>loading...</p>
+      ) : (
+        <>
+          <h2 id="mood-history">mood history</h2>
+
+          <ul aria-labelledby="mood-history">
+            {moodHistory.map((mood) => {
+              const moodString = JSON.stringify(mood);
+
+              return <li key={moodString}>{moodString}</li>;
+            })}
+          </ul>
+        </>
+      )}
     </main>
   );
 };
