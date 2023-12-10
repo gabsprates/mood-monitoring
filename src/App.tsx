@@ -79,7 +79,9 @@ export const App = ({ moods, useCases }: AppProps) => {
           const { label, symbol } = getMoodRepresentation(mood);
 
           const onClick = () => {
-            useCases.addMood({ mood, timestamp: Date.now() });
+            useCases
+              .addMood({ mood, timestamp: Date.now() })
+              .then(() => handleMoodHistory());
           };
 
           return (
